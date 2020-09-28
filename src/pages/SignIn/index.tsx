@@ -15,10 +15,16 @@ const SignIn: React.FC = () => {
 
       <Title>Faça seu Login</Title>
 
-      <Input />
-      <Input />
+      <Input name="email" icon="mail" placeholder="Email" />
+      <Input name="password" icon="lock" placeholder="Senha" />
 
-      <Button>Entrar</Button>
+      <Button
+        onPress={() => {
+          console.log('oi');
+        }}
+      >
+        Entrar
+      </Button>
     </Container>
   );
 };

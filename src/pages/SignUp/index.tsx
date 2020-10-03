@@ -13,6 +13,7 @@ import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 
 import getValidationErrors from '../../utils/getValidationErrors';
+import api from '../../services/api';
 
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -49,7 +50,13 @@ const SignUp: React.FC = () => {
         abortEarly: false,
       });
 
-      // await api.post('/users', data);
+      await api.post('/users', data);
+
+      Alert.alert(
+        'Cadastro realizado com suceso!',
+        'Você já pode se logar no Go-Barber',
+      );
+      navigation.goBack();
     } catch (err) {
       const errors = getValidationErrors(err);
       formRef.current?.setErrors(errors);

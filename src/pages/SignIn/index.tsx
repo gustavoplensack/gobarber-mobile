@@ -14,6 +14,8 @@ import { FormHandles } from '@unform/core';
 
 import getValidationErrors from '../../utils/getValidationErrors';
 
+import { useAuth } from '../../hooks/auth';
+
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
@@ -36,33 +38,42 @@ interface SignInFormData {
 const SignIn: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const passwordInputRef = useRef<TextInput>(null);
+  const { signIn } = useAuth();
 
-  const handleSignIn = useCallback(async (data: SignInFormData) => {
-    formRef.current?.setErrors({});
-    try {
-      const schema = Yup.object().shape({
-        email: Yup.string()
-          .required('E-mail obrigarório')
-          .email('Digite um e-mail válido'),
-        password: Yup.string().required('Digite sua senha'),
-      });
+  const handleSignIn = useCallback(
+    async (data: SignInFormData) => {
+      formRef.current?.setErrors({});
+      try {
+        const schema = Yup.object().shape({
+          email: Yup.string()
+            .required('E-mail obrigarório')
+            .email('Digite um e-mail válido'),
+          password: Yup.string().required('Digite sua senha'),
+        });
 
-      await schema.validate(data, {
-        abortEarly: false,
-      });
+        await schema.validate(data, {
+          abortEarly: false,
+        });
 
-      const { email, password } = data;
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(err);
-        formRef.current?.setErrors(errors);
+        const { email, password } = data;
+
+        await signIn({
+          email,
+          password,
+        });
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formRef.current?.setErrors(errors);
+        }
+        Alert.alert(
+          'Erro na Autenticação',
+          'Erro ao fazer login! Verifique suas credenciais',
+        );
       }
-      Alert.alert(
-        'Erro na Autenticação',
-        'Erro ao fazer login! Verifique suas credenciais',
-      );
-    }
-  }, []);
+    },
+    [signIn],
+  );
 
   const navigation = useNavigation();
 

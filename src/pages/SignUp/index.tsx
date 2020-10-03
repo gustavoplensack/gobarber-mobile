@@ -16,6 +16,9 @@ const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const navigation = useNavigation();
 
+  const mailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+
   return (
     <>
       <KeyboardAvoidingView enabled style={{ flex: 1 }} behavior={undefined}>
@@ -28,15 +31,38 @@ const SignUp: React.FC = () => {
 
             <Title>Faça seu Cadastro</Title>
             <Form ref={formRef} onSubmit={data => console.log(data)}>
-              <Input name="name" icon="user" placeholder="Nome" />
-              <Input name="email" icon="mail" placeholder="Email" />
-              <Input name="password" icon="lock" placeholder="Senha" />
+              <Input
+                name="name"
+                icon="user"
+                autoCorrect={false}
+                autoCapitalize="none"
+                returnKeyType="next"
+                placeholder="Nome"
+                onSubmitEditing={() => mailInputRef.current?.focus()}
+              />
+              <Input
+                ref={mailInputRef}
+                name="email"
+                icon="mail"
+                placeholder="Email"
+                autoCorrect={false}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
+              />
+              <Input
+                ref={passwordInputRef}
+                name="password"
+                icon="lock"
+                placeholder="Senha"
+                secureTextEntry
+                textContentType="newPassword"
+                returnKeyType="send"
+                onSubmitEditing={() => formRef.current?.submitForm()}
+              />
             </Form>
-            <Button
-              onPress={() => {
-                formRef.current?.submitForm();
-              }}
-            >
+            <Button onPress={() => formRef.current?.submitForm()}>
               Crie sua conta
             </Button>
           </Container>

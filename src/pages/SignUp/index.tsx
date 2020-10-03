@@ -1,5 +1,10 @@
 import React, { useRef, useCallback } from 'react';
-import { Image, KeyboardAvoidingView, ScrollView } from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  ScrollView,
+  TextInput,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { Form } from '@unform/mobile';

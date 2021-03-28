@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /**
  * A context is used for sharing information between screens and
  * react components.  This is an aunthentication component.
@@ -12,14 +13,20 @@ import React, {
 import AsyncStorage from '@react-native-community/async-storage';
 import api from '../services/api';
 
+interface IUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url: string;
+}
+
 interface SignInCredentials {
   email: string;
   password: string;
 }
 
 interface AuthContextData {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  user: object;
+  user: IUser;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
   loading: boolean;
@@ -27,8 +34,7 @@ interface AuthContextData {
 
 interface AuthState {
   token: string;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  user: object;
+  user: IUser;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -44,6 +50,7 @@ export const AuthProvider: React.FC = ({ children }) => {
         '@GoBarber:user',
       ]);
       if (token[1] && user[1]) {
+        api.defaults.headers.authorization = `Bearer ${token[1]}`;
         setAuth({ token: token[1], user: JSON.parse(user[1]) });
       }
     }
@@ -64,6 +71,8 @@ export const AuthProvider: React.FC = ({ children }) => {
       ['@GoBarber:token', token],
       ['@GoBarber:user', JSON.stringify(user)],
     ]);
+
+    api.defaults.headers.authorization = `Bearer ${token}`;
 
     setAuth({ token, user });
   }, []);

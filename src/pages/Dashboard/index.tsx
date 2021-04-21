@@ -72,6 +72,7 @@ const Dashboard: React.FC = () => {
       <ProvidersList
         data={providers}
         keyExtractor={provider => provider.id}
+        contentContainerStyle={{ paddingBottom: 48 }}
         ListHeaderComponent={<ProviderListHeader>Barbeiros</ProviderListHeader>}
         renderItem={({ item }) => (
           <ProviderContainer

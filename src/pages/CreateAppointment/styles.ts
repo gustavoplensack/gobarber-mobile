@@ -7,9 +7,7 @@ interface ProviderContainerProps {
   isSelected: boolean;
 }
 
-export const Container = styled.View`
-  flex: 1;
-`;
+export const Container = styled.View``;
 
 export const Header = styled.View`
   padding: 24px;
@@ -36,8 +34,7 @@ export const UserAvatar = styled.Image`
 `;
 
 export const ProvidersListContainer = styled.View`
-  height: 112px;
-  flex: 1;
+  height: 150px;
 `;
 
 export const ProvidersList = styled(FlatList as new () => FlatList<IProvider>)`

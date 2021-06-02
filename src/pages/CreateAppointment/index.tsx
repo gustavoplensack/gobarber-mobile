@@ -15,6 +15,7 @@ import {
   BackButton,
   HeaderTitle,
   UserAvatar,
+  Content,
   ProvidersListContainer,
   ProvidersList,
   ProviderContainer,
@@ -24,6 +25,12 @@ import {
   Calendar,
   OpenDatePickerButton,
   OpenDatePickerButtonText,
+  Schedule,
+  Section,
+  SectionTitle,
+  SectionContent,
+  Hour,
+  HourText,
 } from './styles';
 
 interface IRouteParams {
@@ -52,6 +59,7 @@ const CreateAppointment: React.FC = () => {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedHour, setSelectedHour] = useState(0);
   const [providerDayAvailability, setProviderDayAvailability] = useState<
     IProviderDayAvailabilityItem[]
   >([]);
@@ -81,7 +89,15 @@ const CreateAppointment: React.FC = () => {
     [setSelectedProvider],
   );
 
+  const handleSelectHour = useCallback(
+    (newSelectedHour: number) => {
+      setSelectedHour(newSelectedHour);
+    },
+    [setSelectedHour],
+  );
+
   const handleDateChanged = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any, date: Date | undefined) => {
       if (Platform.OS === 'android') {
         setShowDatePicker(false);
@@ -138,52 +154,94 @@ const CreateAppointment: React.FC = () => {
         <UserAvatar source={{ uri: user.avatar_url }} />
       </Header>
 
-      <ProvidersListContainer>
-        <ProvidersList
-          data={providers}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingRight: 48 }}
-          removeClippedSubviews={false}
-          keyExtractor={provider => provider.id}
-          renderItem={({ item: provider }) => (
-            <ProviderContainer
-              isSelected={provider.id === selectedProvider}
-              onPress={() => handleSelectProvider(provider.id)}
-            >
-              <ProviderAvatar source={{ uri: provider.avatar_url }} />
-              <ProviderName>{provider.name}</ProviderName>
-            </ProviderContainer>
-          )}
-        />
-      </ProvidersListContainer>
-
-      <Calendar>
-        <Title>Escolha a data</Title>
-
-        <OpenDatePickerButton onPress={() => handleToggleDatePicker()}>
-          <OpenDatePickerButtonText>
-            Selecionar outra data
-          </OpenDatePickerButtonText>
-        </OpenDatePickerButton>
-
-        {showDatePicker && (
-          <DateTimePicker
-            mode="date"
-            display="calendar"
-            onChange={handleDateChanged}
-            value={selectedDate}
+      <Content>
+        <ProvidersListContainer>
+          <ProvidersList
+            data={providers}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingRight: 48 }}
+            removeClippedSubviews={false}
+            keyExtractor={provider => provider.id}
+            renderItem={({ item: provider }) => (
+              <ProviderContainer
+                isSelected={provider.id === selectedProvider}
+                onPress={() => handleSelectProvider(provider.id)}
+              >
+                <ProviderAvatar source={{ uri: provider.avatar_url }} />
+                <ProviderName>{provider.name}</ProviderName>
+              </ProviderContainer>
+            )}
           />
-        )}
-      </Calendar>
+        </ProvidersListContainer>
 
-      {morningAvailability.map(({ hourFormatted }) => (
-        <Title key={hourFormatted}>{hourFormatted}</Title>
-      ))}
+        <Calendar>
+          <Title>Escolha a data</Title>
 
-      {afternoonAvailability.map(({ hourFormatted }) => (
-        <Title key={hourFormatted}>{hourFormatted}</Title>
-      ))}
+          <OpenDatePickerButton onPress={() => handleToggleDatePicker()}>
+            <OpenDatePickerButtonText>
+              Selecionar outra data
+            </OpenDatePickerButtonText>
+          </OpenDatePickerButton>
+
+          {showDatePicker && (
+            <DateTimePicker
+              mode="date"
+              display="calendar"
+              onChange={handleDateChanged}
+              value={selectedDate}
+            />
+          )}
+        </Calendar>
+
+        <Schedule>
+          <Title> Escolha o horário</Title>
+
+          <Section>
+            <SectionTitle>Manhã</SectionTitle>
+
+            <SectionContent>
+              {morningAvailability.map(
+                ({ hourFormatted, hour, availability }) => (
+                  <Hour
+                    enabled={availability}
+                    selected={selectedHour === hour}
+                    key={hourFormatted}
+                    available={availability}
+                    onPress={() => handleSelectHour(hour)}
+                  >
+                    <HourText selected={selectedHour === hour}>
+                      {hourFormatted}
+                    </HourText>
+                  </Hour>
+                ),
+              )}
+            </SectionContent>
+          </Section>
+
+          <Section>
+            <SectionTitle>Tarde</SectionTitle>
+
+            <SectionContent>
+              {afternoonAvailability.map(
+                ({ hourFormatted, hour, availability }) => (
+                  <Hour
+                    enabled={availability}
+                    selected={selectedHour === hour}
+                    key={hourFormatted}
+                    available={availability}
+                    onPress={() => handleSelectHour(hour)}
+                  >
+                    <HourText selected={selectedHour === hour}>
+                      {hourFormatted}
+                    </HourText>
+                  </Hour>
+                ),
+              )}
+            </SectionContent>
+          </Section>
+        </Schedule>
+      </Content>
     </Container>
   );
 };

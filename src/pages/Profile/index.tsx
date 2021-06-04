@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import React, { useRef, useCallback } from 'react';
 import {
   Image,
@@ -29,14 +30,16 @@ import {
   ButtonBar,
 } from './styles';
 
-interface signUpFormInterface {
+interface ProileFormInterface {
   email: string;
   name: string;
   password: string;
+  old_password: string;
+  password_confirmation: string;
 }
 
 const Profile: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, updateUser } = useAuth();
   const formRef = useRef<FormHandles>(null);
   const { goBack, navigate } = useNavigation();
 
@@ -46,7 +49,7 @@ const Profile: React.FC = () => {
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
   const handleSignUp = useCallback(
-    async (data: signUpFormInterface) => {
+    async (data: ProileFormInterface) => {
       formRef.current?.setErrors({});
       try {
         const schema = Yup.object().shape({
@@ -54,31 +57,60 @@ const Profile: React.FC = () => {
           email: Yup.string()
             .required('E-mail obrigarório')
             .email('Digite um e-mail válido'),
-          password: Yup.string().required().min(6, 'No mínimo 6 dígitos'),
+          old_password: Yup.string(),
+          password: Yup.string().when('old_password', {
+            is: val => !!val.length,
+            then: Yup.string()
+              .required()
+              .min(6, 'A nova senha deve ter pelo menos 6 caracteres'),
+            otherwise: Yup.string(),
+          }),
+          password_confirmation: Yup.string()
+            .when('old_password', {
+              is: val => !!val.length,
+              then: Yup.string().required('Confirme a nova senha'),
+              otherwise: Yup.string(),
+            })
+            .oneOf([Yup.ref('password'), undefined], 'Confirmação incorreta'),
         });
 
         await schema.validate(data, {
           abortEarly: false,
         });
 
-        await api.post('/users', data);
+        const {
+          name,
+          email,
+          old_password,
+          password,
+          password_confirmation,
+        } = data;
 
-        Alert.alert(
-          'Cadastro realizado com suceso!',
-          'Você já pode se logar no Go-Barber',
-        );
+        const formData = {
+          name,
+          email,
+          ...(old_password
+            ? {
+                old_password,
+                password,
+                password_confirmation,
+              }
+            : {}),
+        };
+
+        const response = await api.put('/profile', formData);
+
+        Alert.alert('Perfil atualizado com suceso!');
+        await updateUser(response.data.user);
         goBack();
       } catch (err) {
         const errors = getValidationErrors(err);
         formRef.current?.setErrors(errors);
 
-        Alert.alert(
-          'Impossível fazer cadastro',
-          'Tentativa de fazer cadastro falhou, tente novamente.',
-        );
+        Alert.alert('Impossível atualizar perfil, tente novamente.');
       }
     },
-    [goBack],
+    [goBack, updateUser],
   );
 
   const handleGoBack = useCallback(() => {
@@ -105,7 +137,11 @@ const Profile: React.FC = () => {
           </UserAvatarButton>
 
           <Title>Meu perfil</Title>
-          <Form ref={formRef} onSubmit={data => handleSignUp(data)}>
+          <Form
+            initialData={{ name: user.name, email: user.email }}
+            ref={formRef}
+            onSubmit={data => handleSignUp(data)}
+          >
             <Input
               name="name"
               icon="user"
